@@ -7,6 +7,7 @@ import torch
 import torch.optim as optim
 import numpy as np
 import sys
+import ipdb
 from get_args import get_args
 from trainer import train, validate, test
 
@@ -247,7 +248,7 @@ if __name__ == '__main__':
 
     torch.save(model.state_dict(), './tmp/torch_model_'+identity+'.pt')
     print('saved model', './tmp/torch_model_'+identity+'.pt')
-
+    # ipdb.set_trace()
     if args.is_variable_block_len:
         print('testing block length',args.block_len_low )
         test(model, args, block_len=args.block_len_low, use_cuda = use_cuda)
