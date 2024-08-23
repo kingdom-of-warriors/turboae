@@ -29,9 +29,6 @@ def to_en(asc_list: List[List[int]]) -> List[str]:
 
 def str_completion(args_len, sentences):
     """将长度不足的句子补全"""
-
-def str_completion(args_len, sentences):
-    """将长度不足的句子补全"""
     for i in range(len(sentences)):
         if len(sentences[i]) < args_len:
             sentences[i] += "*" * (args_len - len(sentences[i]))
