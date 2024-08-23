@@ -12,6 +12,7 @@ from channels import generate_noise
 import numpy as np
 from numpy import arange
 from numpy.random import mtrand
+import ipdb
 
 ######################################################################################
 #
@@ -141,7 +142,8 @@ def test(model, args, block_len = 'default',use_cuda = False):
         block_len = args.block_len
     else:
         pass
-
+    
+    # ipdb.set_trace()
     # Precomputes Norm Statistics.
     if args.precompute_norm_stats:
         with torch.no_grad():
@@ -157,20 +159,19 @@ def test(model, args, block_len = 'default',use_cuda = False):
     snr_interval = (args.snr_test_end - args.snr_test_start)* 1.0 /  (args.snr_points-1)
     snrs = [snr_interval* item + args.snr_test_start for item in range(args.snr_points)]
     print('SNRS', snrs)
-    sigmas = snrs
 
-    for sigma, this_snr in zip(sigmas, snrs):
+    for snr in snrs:
         test_ber, test_bler = .0, .0
         with torch.no_grad():
             num_test_batch = int(args.num_block/(args.batch_size))
             for batch_idx in range(num_test_batch):
-                X_test     = torch.randint(0, 2, (args.batch_size, block_len, args.code_rate_k), dtype=torch.float)
+                X_test     = torch.randint(0, 2, (args.batch_size, block_len, args.code_rate_k), dtype=torch.float) # 形状为[1000, 100, 1]
                 noise_shape = (args.batch_size, args.block_len, args.code_rate_n)
-                fwd_noise  = generate_noise(noise_shape, args, test_sigma=sigma)
+                fwd_noise  = generate_noise(noise_shape, args, test_sigma=snr) # 形状为[1000, 100, 3]
 
-                X_test, fwd_noise= X_test.to(device), fwd_noise.to(device)
+                X_test, fwd_noise= X_test.to(device), fwd_noise.to(device) # [1000, 100, 1]和[1000, 100, 3]
 
-                X_hat_test, the_codes = model(X_test, fwd_noise)
+                X_hat_test, the_codes = model(X_test, fwd_noise) # [1000, 100, 1]和[1000, 100, 3]
 
 
                 test_ber  += errors_ber(X_hat_test,X_test)
@@ -195,7 +196,7 @@ def test(model, args, block_len = 'default',use_cuda = False):
                 test_ber_punc, test_bler_punc = .0, .0
                 for batch_idx in range(num_test_batch):
                     X_test     = torch.randint(0, 2, (args.batch_size, block_len, args.code_rate_k), dtype=torch.float)
-                    fwd_noise  = generate_noise(X_test.shape, args, test_sigma=sigma)
+                    fwd_noise  = generate_noise(X_test.shape, args, test_sigma=snr)
                     X_test, fwd_noise= X_test.to(device), fwd_noise.to(device)
 
                     X_hat_test, the_codes = model(X_test, fwd_noise)
@@ -214,14 +215,14 @@ def test(model, args, block_len = 'default',use_cuda = False):
 
         test_ber  /= num_test_batch
         test_bler /= num_test_batch
-        print('Test SNR',this_snr ,'with ber ', float(test_ber), 'with bler', float(test_bler))
+        print('Test SNR',snr ,'with ber ', float(test_ber), 'with bler', float(test_bler))
         ber_res.append(float(test_ber))
         bler_res.append( float(test_bler))
 
         try:
             test_ber_punc  /= num_test_batch
             test_bler_punc /= num_test_batch
-            print('Punctured Test SNR',this_snr ,'with ber ', float(test_ber_punc), 'with bler', float(test_bler_punc))
+            print('Punctured Test SNR',snr ,'with ber ', float(test_ber_punc), 'with bler', float(test_bler_punc))
             ber_res_punc.append(float(test_ber_punc))
             bler_res_punc.append( float(test_bler_punc))
         except:
@@ -246,6 +247,7 @@ def test(model, args, block_len = 'default',use_cuda = False):
     print('encoder power is',enc_power)
     adj_snrs = [snr_sigma2db(snr_db2sigma(item)/enc_power) for item in snrs]
     print('adjusted SNR should be',adj_snrs)
+
 
 
 

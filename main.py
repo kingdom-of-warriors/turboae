@@ -24,8 +24,11 @@ class Logger(object):
         self.terminal.write(message)
         self.log.write(message)
 
-    def flush(self):
-        pass
+    def flush(self): pass # 为了程ipdb正常运行
+
+    def fileno(self): pass
+
+    def isatty(self): pass
 
 def import_enc(args):
     # choose encoder
@@ -236,8 +239,8 @@ if __name__ == '__main__':
 
     # Testing Processes
 
-    torch.save(model.state_dict(), './tmp/torch_model_'+identity+'.pt')
-    print('saved model', './tmp/torch_model_'+identity+'.pt')
+    # torch.save(model.state_dict(), './tmp/torch_model_'+identity+'.pt')
+    # print('saved model', './tmp/torch_model_'+identity+'.pt')
     # ipdb.set_trace()
     if args.is_variable_block_len:
         print('testing block length',args.block_len_low )
