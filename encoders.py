@@ -361,18 +361,18 @@ class ENC_interCNN(ENCBase):
 
         inputs     = 2.0*inputs - 1.0
         x_sys      = self.enc_cnn_1(inputs)
-        x_sys      = self.enc_act(self.enc_linear_1(x_sys))
+        x_sys      = self.enc_act(self.enc_linear_1(x_sys)) # 激活函数
 
         x_p1       = self.enc_cnn_2(inputs)
-        x_p1       = self.enc_act(self.enc_linear_2(x_p1))
+        x_p1       = self.enc_act(self.enc_linear_2(x_p1)) # 激活函数
 
         x_sys_int  = self.interleaver(inputs)
         x_p2       = self.enc_cnn_3(x_sys_int)
-        x_p2       = self.enc_act(self.enc_linear_3(x_p2))
+        x_p2       = self.enc_act(self.enc_linear_3(x_p2)) # 激活函数
 
         x_tx       = torch.cat([x_sys,x_p1, x_p2], dim = 2)
 
-        codes = self.power_constraint(x_tx)
+        codes = self.power_constraint(x_tx) # 将x_tx标准化为均值1，方差0的序列
 
         return codes
 

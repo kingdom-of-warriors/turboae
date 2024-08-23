@@ -15,20 +15,20 @@ from numpy import arange
 from numpy.random import mtrand
 
 # utils for logger
-class Logger(object):
-    def __init__(self, filename, stream=sys.stdout):
-        self.terminal = stream
-        self.log = open(filename, 'a')
+# class Logger(object):
+#     def __init__(self, filename, stream=sys.stdout):
+#         self.terminal = stream
+#         self.log = open(filename, 'a')
 
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
+#     def write(self, message):
+#         self.terminal.write(message)
+#         self.log.write(message)
 
-    def flush(self): pass # 为了程ipdb正常运行
+#     def flush(self): pass # 为了ipdb正常运行
 
-    def fileno(self): pass
+#     def fileno(self): pass
 
-    def isatty(self): pass
+#     def isatty(self): pass
 
 def import_enc(args):
     # choose encoder
@@ -105,9 +105,10 @@ if __name__ == '__main__':
     print('[ID]', identity)
 
     # put all printed things to log file
-    logfile = open('./logs/'+identity+'_log.txt', 'a')
-    sys.stdout = Logger('./logs/'+identity+'_log.txt', sys.stdout)
+    # logfile = open('./logs/'+identity+'_log.txt', 'a')
+    # sys.stdout = Logger('./logs/'+identity+'_log.txt', sys.stdout)
 
+    # ipdb.set_trace()
     args = get_args()
     print(args)
 
@@ -251,6 +252,7 @@ if __name__ == '__main__':
         test(model, args, block_len=args.block_len_high, use_cuda = use_cuda)
 
     else:
+        sentences = ["I love you.", "I hate you."]
         test(model, args, use_cuda = use_cuda)
 
 

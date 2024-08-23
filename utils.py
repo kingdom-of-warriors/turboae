@@ -11,6 +11,16 @@ def to_en(asc_bin_str):
     """将连续二进制ASC码转换回英文句子"""
     return ''.join(chr(int(asc_bin_str[i:i+8], 2)) for i in range(0, len(asc_bin_str), 8))
 
+def str_completion(args_len, sentences):
+    """将长度不足的句子补全"""
+
+def str_completion(args_len, sentences):
+    """将长度不足的句子补全"""
+    for i in range(len(sentences)):
+        if len(sentences[i]) < args_len:
+            sentences[i] += "*" * (args_len - len(sentences[i]))
+
+    return sentences
 
 def errors_ber(y_true, y_pred, positions = 'default'):
     y_true = y_true.view(y_true.shape[0], -1, 1)

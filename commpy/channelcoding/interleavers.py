@@ -77,12 +77,5 @@ class RandInterlv(_Interleaver):
     def __init__(self, length, seed):
         rand_gen = mtrand.RandomState(seed)
 
-
-
         self.p_array = rand_gen.permutation(arange(length))
 
-
-#class SRandInterlv(_Interleaver):
-
-
-#class QPPInterlv(_Interleaver):

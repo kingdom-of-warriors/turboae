@@ -119,7 +119,7 @@ def get_args():
     parser.add_argument('-num_epoch', type=int, default=1)
     parser.add_argument('-test_ratio', type=int, default=1,help = 'only for high SNR testing')
     # block length related
-    parser.add_argument('-block_len', type=int, default=100)
+    parser.add_argument('-block_len', type=int, default=200)
     parser.add_argument('-block_len_low', type=int, default=10)
     parser.add_argument('-block_len_high', type=int, default=200)
     parser.add_argument('--is_variable_block_len', action='store_true', default=False,
