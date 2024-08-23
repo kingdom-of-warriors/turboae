@@ -97,9 +97,7 @@ def import_dec(args):
     return DEC
 
 if __name__ == '__main__':
-    #################################################
     # load args & setup logger
-    #################################################
     identity = str(np.random.random())[2:8]
     print('[ID]', identity)
 
@@ -113,9 +111,7 @@ if __name__ == '__main__':
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    #################################################
     # Setup Channel AE: Encoder, Decoder, Channel
-    #################################################
     # choose encoder and decoder.
     ENC = import_enc(args)
     DEC = import_dec(args)
@@ -177,9 +173,7 @@ if __name__ == '__main__':
     print(model)
 
 
-    ##################################################################
     # Setup Optimizers, only Adam and Lookahead for now.
-    ##################################################################
 
     if args.optimizer == 'lookahead':
         print('Using Lookahead Optimizers')
@@ -213,9 +207,7 @@ if __name__ == '__main__':
 
         general_optimizer = OPT(filter(lambda p: p.requires_grad, model.parameters()),lr=args.dec_lr)
 
-    #################################################
     # Training Processes
-    #################################################
     report_loss, report_ber = [], []
 
     for epoch in range(1, args.num_epoch + 1):
@@ -242,9 +234,7 @@ if __name__ == '__main__':
         print('test ber trajectory', report_ber)
         print('total epoch', args.num_epoch)
 
-    #################################################
     # Testing Processes
-    #################################################
 
     torch.save(model.state_dict(), './tmp/torch_model_'+identity+'.pt')
     print('saved model', './tmp/torch_model_'+identity+'.pt')

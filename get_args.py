@@ -180,7 +180,6 @@ def get_args():
 
     ################################################################
     # Loss related parameters
-    ################################################################
 
     parser.add_argument('-loss', choices=['bce', 'mse','focal', 'bce_block', 'maxBCE', 'bce_rl', 'enc_rl', 'soft_ber', 'sortBCE'],
                         default='bce', help='only BCE works')
