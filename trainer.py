@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 eps  = 1e-6
 
-from utils import snr_sigma2db, snr_db2sigma, code_power, errors_ber_pos, errors_ber, errors_bler
+from utils import snr_sigma2db, snr_db2sigma, code_power, errors_ber_pos, errors_ber, errors_bler, to_en, to_asc, str_completion
 from loss import customized_loss
 from channels import generate_noise
 
@@ -274,9 +274,11 @@ def test_sen(model, args, sentences, snrs, block_len = 'default',use_cuda = Fals
     for snr in snrs:
         test_ber, test_bler = .0, .0
         with torch.no_grad():
+            # ipdb.set_trace()
             num_test_batch = int(args.num_block/(args.batch_size))
             for batch_idx in range(num_test_batch):
-                X_test     = torch.randint(0, 2, (args.batch_size, block_len, args.code_rate_k), dtype=torch.float) # 形状为[1000, 100, 1]
+                sentences = str_completion(args_len=int(args.block_len / 8), sentences=sentences) # 将句子长度补为需要的长度
+                X_test = torch.tensor(to_asc(strings=sentences), dtype=torch.float).unsqueeze(-1)
                 noise_shape = (args.batch_size, args.block_len, args.code_rate_n)
                 fwd_noise  = generate_noise(noise_shape, args, test_sigma=snr) # 形状为[1000, 100, 3]
                 X_test, fwd_noise= X_test.to(device), fwd_noise.to(device) # [1000, 100, 1]和[1000, 100, 3]

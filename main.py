@@ -9,7 +9,7 @@ import numpy as np
 import sys
 import ipdb
 from get_args import get_args
-from trainer import train, validate, test
+from trainer import train, validate, test, test_sen
 
 from numpy import arange
 from numpy.random import mtrand
@@ -253,7 +253,7 @@ if __name__ == '__main__':
 
     else:
         sentences = ["I love you.", "I hate you."]
-        test(model, args, use_cuda = use_cuda)
+        test_sen(model, args, sentences=sentences, snrs=[0.0], use_cuda = use_cuda)
 
 
 

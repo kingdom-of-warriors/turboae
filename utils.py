@@ -2,14 +2,30 @@ __author__ = 'yihanjiang'
 import torch
 import numpy as np
 import math
+from typing import List
 
-def to_asc(s):
-    """将英文句子转换为对应的连续二进制ASC码"""
-    return ''.join(format(ord(char), '08b') for char in s)
+def to_asc(strings: List[str]) -> List[List[int]]:
+    """将字符串列表转换为ASCII码的二进制表示列表"""
+    asc_list = []
+    for s in strings:
+        bin_list = []
+        for char in s:
+            bin_str = format(ord(char), '08b')
+            bin_list.extend([int(bit) for bit in bin_str])
+        asc_list.append(bin_list)
+    return asc_list
 
-def to_en(asc_bin_str):
-    """将连续二进制ASC码转换回英文句子"""
-    return ''.join(chr(int(asc_bin_str[i:i+8], 2)) for i in range(0, len(asc_bin_str), 8))
+def to_en(asc_list: List[List[int]]) -> List[str]:
+    """将ASCII码的二进制表示列表转换回字符串列表"""
+    strings = []
+    for bin_list in asc_list:
+        s = ""
+        for i in range(0, len(bin_list), 8):
+            byte = bin_list[i:i+8]
+            char = chr(int(''.join(map(str, byte)), 2))
+            s += char
+        strings.append(s)
+    return strings
 
 def str_completion(args_len, sentences):
     """将长度不足的句子补全"""
