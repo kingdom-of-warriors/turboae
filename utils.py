@@ -3,6 +3,15 @@ import torch
 import numpy as np
 import math
 
+def to_asc(s):
+    """将英文句子转换为对应的连续二进制ASC码"""
+    return ''.join(format(ord(char), '08b') for char in s)
+
+def to_en(asc_bin_str):
+    """将连续二进制ASC码转换回英文句子"""
+    return ''.join(chr(int(asc_bin_str[i:i+8], 2)) for i in range(0, len(asc_bin_str), 8))
+
+
 def errors_ber(y_true, y_pred, positions = 'default'):
     y_true = y_true.view(y_true.shape[0], -1, 1)
     y_pred = y_pred.view(y_pred.shape[0], -1, 1)
