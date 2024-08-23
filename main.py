@@ -252,8 +252,9 @@ if __name__ == '__main__':
         test(model, args, block_len=args.block_len_high, use_cuda = use_cuda)
 
     else:
-        sentences = ["I love you.", "I hate you."]
-        test_sen(model, args, sentences=sentences, snrs=[0.0], use_cuda = use_cuda)
+        sentences = ["I love you.", "I love my father and son."]
+        snrs = [-1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0]
+        test_sen(model, args, sentences=sentences, snrs=snrs, use_cuda = use_cuda)
 
 
 

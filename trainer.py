@@ -274,31 +274,29 @@ def test_sen(model, args, sentences, snrs, block_len = 'default',use_cuda = Fals
     for snr in snrs:
         test_ber, test_bler = .0, .0
         with torch.no_grad():
-            # ipdb.set_trace()
-            num_test_batch = int(args.num_block/(args.batch_size))
-            for batch_idx in range(num_test_batch):
-                sentences = str_completion(args_len=int(args.block_len / 8), sentences=sentences) # 将句子长度补为需要的长度
-                X_test = torch.tensor(to_asc(strings=sentences), dtype=torch.float).unsqueeze(-1)
-                noise_shape = (args.batch_size, args.block_len, args.code_rate_n)
-                fwd_noise  = generate_noise(noise_shape, args, test_sigma=snr) # 形状为[1000, 100, 3]
-                X_test, fwd_noise= X_test.to(device), fwd_noise.to(device) # [1000, 100, 1]和[1000, 100, 3]
-                X_hat_test, the_codes = model(X_test, fwd_noise) # [1000, 100, 1]和[1000, 100, 3]
+            sentences = str_completion(args_len=int(args.block_len / 8), sentences=sentences) # 将句子长度补为需要的长度
+            X_test = torch.tensor(to_asc(strings=sentences), dtype=torch.float).unsqueeze(-1)
+            noise_shape = (args.batch_size, args.block_len, args.code_rate_n)
+            fwd_noise  = generate_noise(noise_shape, args, test_sigma=snr) # 形状为[1000, 100, 3]
+            X_test, fwd_noise= X_test.to(device), fwd_noise.to(device) # [1000, 100, 1]和[1000, 100, 3]
+            X_hat_test, the_codes = model(X_test, fwd_noise) # [1000, 100, 1]和[1000, 100, 3]
+            test_ber  += errors_ber(X_hat_test,X_test)
+            test_bler += errors_bler(X_hat_test,X_test)
 
-                test_ber  += errors_ber(X_hat_test,X_test)
-                test_bler += errors_bler(X_hat_test,X_test)
-                if batch_idx == 0:
-                    test_pos_ber = errors_ber_pos(X_hat_test,X_test)
-                    codes_power  = code_power(the_codes)
-                else:
-                    test_pos_ber += errors_ber_pos(X_hat_test,X_test)
-                    codes_power  += code_power(the_codes)
+            X_hat_test = X_hat_test.squeeze(-1).cpu().numpy() # [2, 200, 1]tensor --> (2, 200) numpy array
+            X_hat_test = np.where(X_hat_test > 0.5, 1, 0) # 将小于0.5的元素变为0，大于0.5的元素变为1
+            # if batch_idx == 0:
+            #     test_pos_ber = errors_ber_pos(X_hat_test,X_test)
+            #     codes_power  = code_power(the_codes)
+            # else:
+            #     test_pos_ber += errors_ber_pos(X_hat_test,X_test)
+            #     codes_power  += code_power(the_codes)
+            sen_hat = to_en(X_hat_test)
+            print(sen_hat)
 
-
-        test_ber  /= num_test_batch
-        test_bler /= num_test_batch
         print('Test SNR',snr ,'with ber ', float(test_ber), 'with bler', float(test_bler))
         ber_res.append(float(test_ber))
-        bler_res.append( float(test_bler))
+        bler_res.append(float(test_bler))
 
 
     print('final results on SNRs ', snrs)
