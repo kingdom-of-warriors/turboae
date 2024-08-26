@@ -5,13 +5,15 @@ import torch.nn.functional as F
 
 eps  = 1e-6
 
-from utils import snr_sigma2db, snr_db2sigma, code_power, errors_ber_pos, errors_ber, errors_bler, to_en, to_asc, str_completion
+from utils import snr_sigma2db, snr_db2sigma, code_power, errors_ber_pos, \
+errors_ber, errors_bler, to_en, to_asc, str_completion, replace_and_round
 from loss import customized_loss
 from channels import generate_noise
 
 import numpy as np
 from numpy import arange
 from numpy.random import mtrand
+from typing import List
 import ipdb
 
 ######################################################################################
@@ -250,8 +252,7 @@ def test(model, args, block_len = 'default',use_cuda = False):
 
 
 
-def test_sen(model, args, sentences, snrs, block_len = 'default',use_cuda = False):
-
+def test_sen(model, args, sentences, snrs, sigma, block_len = 'default', use_cuda = False):
     device = torch.device("cuda" if use_cuda else "cpu")
     model.eval()
 
@@ -274,35 +275,33 @@ def test_sen(model, args, sentences, snrs, block_len = 'default',use_cuda = Fals
     for snr in snrs:
         test_ber, test_bler = .0, .0
         with torch.no_grad():
-            sentences = str_completion(args_len=int(args.block_len / 8), sentences=sentences) # 将句子长度补为需要的长度
-            X_test = torch.tensor(to_asc(strings=sentences), dtype=torch.float).unsqueeze(-1)
+            
+            sentences_len = [len(s) for s in sentences] # 留一份sentences的长度的，后面要用
+            sentences_add = str_completion(args_len=int(args.block_len / 8), sentences=sentences) # 将句子长度补为需要的长度
+            X_test = torch.tensor(to_asc(strings=sentences_add), dtype=torch.float).unsqueeze(-1)
             noise_shape = (args.batch_size, args.block_len, args.code_rate_n)
             fwd_noise  = generate_noise(noise_shape, args, test_sigma=snr) # 形状为[1000, 100, 3]
             X_test, fwd_noise= X_test.to(device), fwd_noise.to(device) # [1000, 100, 1]和[1000, 100, 3]
             X_hat_test, the_codes = model(X_test, fwd_noise) # [1000, 100, 1]和[1000, 100, 3]
             test_ber  += errors_ber(X_hat_test,X_test)
             test_bler += errors_bler(X_hat_test,X_test)
+            X_hat_test = X_hat_test.squeeze(-1).cpu().numpy() # [2, 200, 1]tensor --> (2, 200) ndarray
+            detect_unsure(sentences_len, X_hat_test, 0.02)
 
-            X_hat_test = X_hat_test.squeeze(-1).cpu().numpy() # [2, 200, 1]tensor --> (2, 200) numpy array
-            X_hat_test = np.where(X_hat_test > 0.5, 1, 0) # 将小于0.5的元素变为0，大于0.5的元素变为1
-            # if batch_idx == 0:
-            #     test_pos_ber = errors_ber_pos(X_hat_test,X_test)
-            #     codes_power  = code_power(the_codes)
-            # else:
-            #     test_pos_ber += errors_ber_pos(X_hat_test,X_test)
-            #     codes_power  += code_power(the_codes)
-            sen_hat = to_en(X_hat_test)
-            print(sen_hat)
-
-        print('Test SNR',snr ,'with ber ', float(test_ber), 'with bler', float(test_bler))
-        ber_res.append(float(test_ber))
-        bler_res.append(float(test_bler))
+def detect_unsure(sentences_len: List[int], X_hat_test: np.ndarray[any, any], sigma: float) -> any:
+    """输入原句子（未补长）和解码后的X_hat_test和容忍度sigma，输出。。。"""
+    for idx, sentence_asc in enumerate(X_hat_test): # idx为句子的序号
+        sentence_asc_possible = replace_and_round(sentence_asc, sigma) # 第idx个句子所有asc码可能性
+        sentence_en_possible = to_en(sentence_asc_possible) # 第idx个句子所有english可能性
+        sentence_en_possible = [s[ : sentences_len[idx]] for s in sentence_en_possible] # 把一开始补充的长度删掉
+        for s in sentence_en_possible:
+            print(s)
 
 
-    print('final results on SNRs ', snrs)
-    print('BER', ber_res)
-    print('BLER', bler_res)
-    print('final results on punctured SNRs ', snrs)
+
+
+
+
 
 
 

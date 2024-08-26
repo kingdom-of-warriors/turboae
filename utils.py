@@ -3,6 +3,23 @@ import torch
 import numpy as np
 import math
 from typing import List
+from itertools import product
+import re
+
+def replace_and_round(arr: np.ndarray, x: float) -> List[List[int]]:
+    """输入为二维ndarray，输出为将所有[0.5-x, 0.5+x]区间内的数替换为0或1，在区间范围外的就四舍五入成0或1的所有可能的ndarray"""
+    mask = (arr >= (0.5 - x)) & (arr <= (0.5 + x))
+    indices = np.where(mask)
+    # 生成所有可能的替换组合 (0 和 1 的组合)
+    combinations = list(product([0, 1], repeat=len(indices[0])))
+    result = []
+    for combo in combinations:
+        new_arr = arr.copy()
+        new_arr[indices] = combo
+        new_arr[~mask] = np.round(new_arr[~mask])
+        result.append(new_arr.astype(int))
+    return result
+
 
 def to_asc(strings: List[str]) -> List[List[int]]:
     """将字符串列表转换为ASCII码的二进制表示列表"""
@@ -27,13 +44,20 @@ def to_en(asc_list: List[List[int]]) -> List[str]:
         strings.append(s)
     return strings
 
-def str_completion(args_len, sentences):
-    """将长度不足的句子补全"""
+def str_completion(args_len: int, sentences: List[List[int]]) -> List[List[int]]:
+    """将长度不足的句子补全为args_len的长度"""
     for i in range(len(sentences)):
         if len(sentences[i]) < args_len:
             sentences[i] += "*" * (args_len - len(sentences[i]))
 
     return sentences
+
+
+def is_valid_string(s: str) -> bool:
+    """使用正则表达式来匹配只包含大小写英文字母和常见英文标点符号的字符串"""
+    pattern = r'^[A-Za-z0-9 .,!?"\'():;_\-\[\]{}<>@#$%^&*+=|\\/~`]*$'
+    return bool(re.fullmatch(pattern, s))
+
 
 def errors_ber(y_true, y_pred, positions = 'default'):
     y_true = y_true.view(y_true.shape[0], -1, 1)

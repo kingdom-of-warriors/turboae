@@ -253,8 +253,8 @@ if __name__ == '__main__':
 
     else:
         sentences = ["I love you.", "I love my father and son."]
-        snrs = [-1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0]
-        test_sen(model, args, sentences=sentences, snrs=snrs, use_cuda = use_cuda)
+        snrs = [0.0, 0.5]
+        test_sen(model, args, sentences=sentences, sigma=0.01, snrs=snrs, use_cuda = use_cuda)
 
 
 
